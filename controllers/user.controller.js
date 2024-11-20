@@ -11,8 +11,6 @@ const {
 const { CookieOption } = require("../constant");
 const { validationError, AppError } = require("../customError");
 
-
-
 const regiterUser = async (req, res) => {
   try {
     const { email, username, password } = req.body;
@@ -102,11 +100,9 @@ const loginUser = async (req, res) => {
       user?._id
     );
 
-    
     user.password = undefined;
     user.isVerified = undefined;
     user.refreshToken = undefined;
-
 
     res.cookie("accessToken", AccessToken, CookieOption);
     res.cookie("refreshToken", RefreshToken, CookieOption);
@@ -158,33 +154,60 @@ const verifyOtp = async (req, res) => {
   }
 };
 
-const incomingAccessAndRefreshToken=async(req,res)=>{
-    try {
-        let user=await User.findById(req?.id)
-        if(!user){
-            throw new validationError("user not found ")
-        }
-        if(user.refresh !== req.cookies?.refreshToken){
-            throw new AppError(401,"Invalid refresh token please login again")
-        }
-        const {AccessToken,RefreshToken }=await generateAccessAndRefreshToken(user._id)
-        res.cookie("accessToken",AccessToken,CookieOption)
-        res.cookie("refreshToken",RefreshToken,CookieOption)
-
-        okResponse(res,200,"Access token refreshed successfull ",{},{
-            accessToken:AccessToken,
-            refreshToken:RefreshToken
-        })
-    } catch (error) {
-        console.log("ERRORS IN INCOMING ACCESS TOKEN AND REFRESH TOKEN ::  ",error)
-        next(error)
+const incomingAccessAndRefreshToken = async (req, res, next) => {
+  try {
+    let user = await User.findById(req?.id);
+    if (!user) {
+      throw new validationError("user not found ");
     }
-}
+    if (user.refreshToken !== req.cookies?.refreshToken) {
+      throw new AppError(401, "Invalid refresh token please login again");
+    }
+    const { AccessToken, RefreshToken } = await generateAccessAndRefreshToken(
+      user._id
+    );
+    res.cookie("accessToken", AccessToken, CookieOption);
+    res.cookie("refreshToken", RefreshToken, CookieOption);
 
+    okResponse(
+      res,
+      200,
+      "Access token refreshed successfull ",
+      {},
+      {
+        accessToken: AccessToken,
+        refreshToken: RefreshToken,
+      }
+    );
+  } catch (error) {
+    console.log(
+      "ERRORS IN INCOMING ACCESS TOKEN AND REFRESH TOKEN ::  ",
+      error
+    );
+    next(error);
+  }
+};
 
-const changeProfilePassword=async(req,res)=>{
+const changeProfilePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    let user = await User.findById(req.user?._id);
+    if (!user) {
+      throw new validationError("user not found");
+    }
+    const matchPassword = await user.isPasswordCorrect(currentPassword);
+    if (!matchPassword) {
+      throw new validationError("crediential failed");
+    }
+    user.password = newPassword;
+    await user.save({ validateBeforeSave: false });
 
-}
+    okResponse(res, 200, "password changed successfully !", {});
+  } catch (error) {
+    console.log("ERROR IN CHANGE PROFILE PASSWORD :: ", error);
+    next(error);
+  }
+};
 module.exports = {
   regiterUser,
   verifiedUser,
@@ -192,5 +215,5 @@ module.exports = {
   verifyOtp,
   forgetPassword,
   incomingAccessAndRefreshToken,
-
+  changeProfilePassword,
 };
