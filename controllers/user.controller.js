@@ -202,7 +202,7 @@ const changeProfilePassword = async (req, res, next) => {
     user.password = newPassword;
     await user.save({ validateBeforeSave: false });
 
-    okResponse(res, 200, "password changed successfully !", {});
+    okResponse(res, 200, "password changed successfully !", null);
   } catch (error) {
     console.log("ERROR IN CHANGE PROFILE PASSWORD :: ", error);
     next(error);
