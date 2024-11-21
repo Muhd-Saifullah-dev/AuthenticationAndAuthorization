@@ -32,6 +32,8 @@ userRoute.get(
 userRoute.patch(
   "/change-password",
   tokens.verifyJwt,
+  ResetPassword,
+  ErrorResult,
   userController.changeProfilePassword
 );
 module.exports = userRoute;
