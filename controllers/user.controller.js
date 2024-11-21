@@ -137,7 +137,7 @@ const forgetPassword = async (req, res) => {
   }
 };
 
-const verifyOtp = async (req, res) => {
+const verifyOtpAndSetNewPassword = async (req, res) => {
   try {
     const { otp, newPassword } = req.body;
     let user = await User.findOne({ otp });
@@ -212,7 +212,7 @@ module.exports = {
   regiterUser,
   verifiedUser,
   loginUser,
-  verifyOtp,
+  verifyOtpAndSetNewPassword,
   forgetPassword,
   incomingAccessAndRefreshToken,
   changeProfilePassword,

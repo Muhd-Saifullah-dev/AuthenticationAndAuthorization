@@ -18,18 +18,18 @@ userRoute.post(
 userRoute.get("/verify/:verificationToken", userController.verifiedUser);
 userRoute.post("/login", userController.loginUser);
 userRoute.post("/forget-password", userController.forgetPassword);
-userRoute.post(
+userRoute.patch(
   "/verify-otp",
   ResetPassword,
   ErrorResult,
-  userController.verifyOtp
+  userController.verifyOtpAndSetNewPassword
 );
 userRoute.get(
   "/incoming-refreshed-tokens",
   tokens.refreshAccessToken,
   userController.incomingAccessAndRefreshToken
 );
-userRoute.post(
+userRoute.patch(
   "/change-password",
   tokens.verifyJwt,
   userController.changeProfilePassword
