@@ -18,7 +18,7 @@ const transporter = nodemailer.createTransport({
         from: '"Maddison Foo Koch 👻" <maddison53@ethereal.email>', 
         to: email,  // Recipient's email address
         subject:"Verify your Email",  // Subject line
-        html: `<b>verify Your Email Click the Link :</b> <a href="http://localhost/api/v1/user/verify/${verificationLink}">http://localhost/api/v1/user/verify/${verificationLink}</a>`, 
+        html: `<b>verify Your Email Click the Link :</b> <a class=button href="http://localhost:8000/api/v1/user/verify/${verificationLink}"><button>Verify Email</button></a>`, 
       };
     
       try {

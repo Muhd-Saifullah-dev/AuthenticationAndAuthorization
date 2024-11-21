@@ -12,7 +12,7 @@ const verifyJwt = async (req, __, next) => {
       throw new AppError(400, "Token is not valid");
     }
     const decoded = JWT.verify(verifyToken, ACCESS_SECRET);
-    const user = await User.findById(decoded?._id).select(
+    const user = await User.findById(decoded?.id).select(
       "-password -refreshToken"
     );
     if (!user) {
@@ -28,12 +28,14 @@ const verifyJwt = async (req, __, next) => {
 
 const refreshAccessToken = async (req, _, next) => {
   try {
-    const refreshToken = req.cookies?.RefreshToken || req.body?.refreshToken;
+    const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
+    console.log("Refresh Token ",refreshToken)
     if (!refreshToken) {
       throw new AppError(400, "Invalid refresh token");
     }
     const decode = JWT.verify(refreshToken, REFRESH_SECRET);
-    req.id = decode?._id;
+    console.log("decoded",decode.id)
+    req.user = decode;
     next();
   } catch (error) {
     console.log("ERROR IN REFRESH ACCESS TOKEN :: ", error);

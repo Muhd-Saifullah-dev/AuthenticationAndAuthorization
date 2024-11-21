@@ -36,4 +36,8 @@ userRoute.patch(
   ErrorResult,
   userController.changeProfilePassword
 );
+
+
+userRoute.post("/logout",tokens.verifyJwt,userController.logoutUser)
+
 module.exports = userRoute;

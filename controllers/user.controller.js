@@ -10,6 +10,7 @@ const {
 } = require("../utils/create.tokens.utils");
 const { CookieOption } = require("../constant");
 const { validationError, AppError } = require("../customError");
+const { error } = require("console");
 
 const regiterUser = async (req, res) => {
   try {
@@ -64,6 +65,7 @@ const verifiedUser = async (req, res) => {
           verificationToken: "",
         },
       }
+      
     );
     if (!user) {
       return res.status(400).json({ message: "Please verify your Email" });
@@ -142,11 +144,12 @@ const verifyOtpAndSetNewPassword = async (req, res) => {
     const { otp, newPassword } = req.body;
     let user = await User.findOne({ otp });
     if (!user) {
-      handleError(res, 400, "otp is incorrect");
+     return handleError(res, 400, "otp is incorrect");
     }
 
     user.password = newPassword;
     user.otp = 0;
+    await user.save()
     okResponse(res, 200, "new password set successfull");
   } catch (error) {
     console.log("Error", error);
@@ -156,9 +159,11 @@ const verifyOtpAndSetNewPassword = async (req, res) => {
 
 const incomingAccessAndRefreshToken = async (req, res, next) => {
   try {
-    let user = await User.findById(req?.id);
+    let user = await User.findById(req.user?.id);
+   
     if (!user) {
-      throw new validationError("user not found ");
+      console.log("Error in User",error)
+      // throw new validationError("user not found ");
     }
     if (user.refreshToken !== req.cookies?.refreshToken) {
       throw new AppError(401, "Invalid refresh token please login again");
@@ -208,6 +213,17 @@ const changeProfilePassword = async (req, res, next) => {
     next(error);
   }
 };
+
+const logoutUser=async(req,res,next)=>{
+  try {
+    res.clearCookie("refreshToken",CookieOption)
+    res.clearCookie("accessToken",CookieOption)
+    okResponse(res, 200, "user logged out successfully !");
+  } catch (error) {
+    console.log("error",error)
+    next(error)
+  }
+}
 module.exports = {
   regiterUser,
   verifiedUser,
@@ -216,4 +232,5 @@ module.exports = {
   forgetPassword,
   incomingAccessAndRefreshToken,
   changeProfilePassword,
+  logoutUser
 };
